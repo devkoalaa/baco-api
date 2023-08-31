@@ -11,7 +11,7 @@ app.use(express.raw({ type: "application/vnd.custom-type" }));
 app.use(express.text({ type: "text/html" }));
 
 app.get("/items", async (req, res) => {
-  console.log('UHUUUUUUUUUUUUUUUUU GALINHA DA API!!!')
+  console.log('get')
   const items = await prisma.item.findMany({
     orderBy: { createdAt: "desc" },
   });
@@ -20,6 +20,7 @@ app.get("/items", async (req, res) => {
 });
 
 app.post("/items", async (req, res) => {
+  console.log('post')
   const item = await prisma.item.create({
     data: {
       name: req.body.name ?? "Sem nome",
@@ -33,6 +34,7 @@ app.post("/items", async (req, res) => {
 });
 
 app.get("/items/:id", async (req, res) => {
+  console.log('getById')
   const id = req.params.id;
   const item = await prisma.item.findUnique({
     where: { id },
@@ -42,6 +44,7 @@ app.get("/items/:id", async (req, res) => {
 });
 
 app.put("/items/:id", async (req, res) => {
+  console.log('put')
   const id = req.params.id;
   const item = await prisma.item.update({
     where: { id },
@@ -52,6 +55,7 @@ app.put("/items/:id", async (req, res) => {
 });
 
 app.delete("/items/:id", async (req, res) => {
+  console.log('delete')
   const id = req.params.id;
   await prisma.item.delete({
     where: { id },
