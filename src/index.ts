@@ -22,9 +22,9 @@ app.get("/items", async (req, res) => {
 app.post("/items", async (req, res) => {
   const item = await prisma.item.create({
     data: {
-      name: req.body.name ?? "Empty item",
-      quantity: 1,
-      image: 'https://github.com/devkoalaa.png',
+      name: req.body.name ?? "Sem nome",
+      quantity: req.body.quantity ?? 0,
+      image: req.body.quantity ?? 'https://github.com/devkoalaa.png',
       createdAt: new Date(),
     },
   });
