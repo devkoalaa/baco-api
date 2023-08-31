@@ -10,48 +10,50 @@ app.use(express.json());
 app.use(express.raw({ type: "application/vnd.custom-type" }));
 app.use(express.text({ type: "text/html" }));
 
-app.get("/todos", async (req, res) => {
-  const todos = await prisma.todo.findMany({
+app.get("/items", async (req, res) => {
+  console.log('UHUUUUUUUUUUUUUUUUU GALINHA DA API!!!')
+  const items = await prisma.item.findMany({
     orderBy: { createdAt: "desc" },
   });
 
-  res.json(todos);
+  res.json(items);
 });
 
-app.post("/todos", async (req, res) => {
-  const todo = await prisma.todo.create({
+app.post("/items", async (req, res) => {
+  const item = await prisma.item.create({
     data: {
-      completed: false,
+      name: req.body.name ?? "Empty item",
+      quantity: 1,
+      image: 'https://github.com/devkoalaa.png',
       createdAt: new Date(),
-      text: req.body.text ?? "Empty todo",
     },
   });
 
-  return res.json(todo);
+  return res.json(item);
 });
 
-app.get("/todos/:id", async (req, res) => {
+app.get("/items/:id", async (req, res) => {
   const id = req.params.id;
-  const todo = await prisma.todo.findUnique({
+  const item = await prisma.item.findUnique({
     where: { id },
   });
 
-  return res.json(todo);
+  return res.json(item);
 });
 
-app.put("/todos/:id", async (req, res) => {
+app.put("/items/:id", async (req, res) => {
   const id = req.params.id;
-  const todo = await prisma.todo.update({
+  const item = await prisma.item.update({
     where: { id },
     data: req.body,
   });
 
-  return res.json(todo);
+  return res.json(item);
 });
 
-app.delete("/todos/:id", async (req, res) => {
+app.delete("/items/:id", async (req, res) => {
   const id = req.params.id;
-  await prisma.todo.delete({
+  await prisma.item.delete({
     where: { id },
   });
 
@@ -61,16 +63,16 @@ app.delete("/todos/:id", async (req, res) => {
 app.get("/", async (req, res) => {
   res.send(
     `
-  <h1>Todo REST API</h1>
+  <h1>Item REST API</h1>
   <h2>Available Routes</h2>
   <pre>
-    GET, POST /todos
-    GET, PUT, DELETE /todos/:id
+    GET, POST /items
+    GET, PUT, DELETE /items/:id
   </pre>
   `.trim(),
   );
 });
 
 app.listen(Number(port), "0.0.0.0", () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+  console.log(`Example app listening at http://localhost:${port}`);
 });
