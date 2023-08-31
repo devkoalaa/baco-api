@@ -13,7 +13,7 @@ app.use(express.text({ type: "text/html" }));
 app.get("/items", async (req, res) => {
   console.log('get')
   const items = await prisma.item.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: "asc" },
   });
 
   res.json(items);
