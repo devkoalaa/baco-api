@@ -62,7 +62,11 @@ async function uploadFile(file: Stream, name: string) {
 
 app.post('/upload', async (req: any, res: any) => {
   consoleLog('upload')
+  console.log('req:', req)
+  console.log('req.files:', req.files)
   const { image } = req.files;
+  console.log('image:', image)
+  console.log('image.data:', image.data)
 
   const bufferStream = new stream.PassThrough()
   bufferStream.end(image.data)
