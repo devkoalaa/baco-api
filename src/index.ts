@@ -1,5 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import express from "express";
+import { Stream } from "stream";
+const fileUpload = require('express-fileupload');
+const GOOGLE_API_FOLDER_ID = "1EUjB4GdBUhMUnl1tTfKXudpAsq6_D9BC";
+const stream = require('stream');
+const { google } = require('googleapis')
 
 const prisma = new PrismaClient();
 
@@ -9,9 +14,69 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.raw({ type: "application/vnd.custom-type" }));
 app.use(express.text({ type: "text/html" }));
+app.use(fileUpload());
+
+function consoleLog(rota: string) {
+  let date_ob = new Date();
+  let date = ("0" + date_ob.getDate()).slice(-2);
+  let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+  let year = date_ob.getFullYear();
+  let hours = date_ob.getHours();
+  let minutes = date_ob.getMinutes();
+  console.log(rota, date + "/" + month + "/" + year + " " + hours + ":" + minutes);
+}
+
+async function uploadFile(file: Stream, name: string) {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      keyFile: 'baco-api.json',
+      scopes: ['https://www.googleapis.com/auth/drive']
+    })
+
+    const driveService = google.drive({
+      version: "v3",
+      auth
+    })
+
+    const fileMetaData = {
+      'name': name,
+      'parents': [GOOGLE_API_FOLDER_ID]
+    }
+
+    const media = {
+      mimeType: 'image/png',
+      body: file
+    }
+
+    const response = await driveService.files.create({
+      resource: fileMetaData,
+      media: media,
+      fields: 'id'
+    })
+
+    return response.data.id
+  } catch (err) {
+    console.log('Erro ao criar arquivo:', err)
+  }
+}
+
+app.post('/upload', async (req: any, res: any) => {
+  consoleLog('upload')
+  const { image } = req.files;
+
+  const bufferStream = new stream.PassThrough()
+  bufferStream.end(image.data)
+
+  uploadFile(bufferStream, image.name).then(data => {
+    res.json({
+      imageName: image.name,
+      imageUrl: `https://drive.google.com/uc?export=view&id=${data}`
+    })
+  })
+})
 
 app.get("/items", async (req, res) => {
-  console.log('get')
+  consoleLog('get')
   const items = await prisma.item.findMany({
     orderBy: { createdAt: "asc" },
   });
@@ -20,7 +85,7 @@ app.get("/items", async (req, res) => {
 });
 
 app.post("/items", async (req, res) => {
-  console.log('post')
+  consoleLog('post')
   const item = await prisma.item.create({
     data: {
       name: req.body.name ?? "Sem nome",
@@ -34,7 +99,7 @@ app.post("/items", async (req, res) => {
 });
 
 app.get("/items/:id", async (req, res) => {
-  console.log('getById')
+  consoleLog('getById')
   const id = req.params.id;
   const item = await prisma.item.findUnique({
     where: { id },
@@ -44,7 +109,7 @@ app.get("/items/:id", async (req, res) => {
 });
 
 app.put("/items/:id", async (req, res) => {
-  console.log('put')
+  consoleLog('put')
   const id = req.params.id;
   const item = await prisma.item.update({
     where: { id },
@@ -55,7 +120,7 @@ app.put("/items/:id", async (req, res) => {
 });
 
 app.delete("/items/:id", async (req, res) => {
-  console.log('delete')
+  consoleLog('delete')
   const id = req.params.id;
   await prisma.item.delete({
     where: { id },
