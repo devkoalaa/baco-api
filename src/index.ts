@@ -21,7 +21,7 @@ function consoleLog(rota: string) {
   let date = ("0" + date_ob.getDate()).slice(-2);
   let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
   let year = date_ob.getFullYear();
-  let hours = date_ob.getHours();
+  let hours = date_ob.getHours() - 3;
   let minutes = date_ob.getMinutes();
   console.log(rota, date + "/" + month + "/" + year + " " + hours + ":" + minutes);
 }
@@ -62,11 +62,7 @@ async function uploadFile(file: Stream, name: string) {
 
 app.post('/upload', async (req: any, res: any) => {
   consoleLog('upload')
-  console.log('req:', req)
-  console.log('req.files:', req.files)
   const { image } = req.files;
-  console.log('image:', image)
-  console.log('image.data:', image.data)
 
   const bufferStream = new stream.PassThrough()
   bufferStream.end(image.data)
