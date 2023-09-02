@@ -21,6 +21,5 @@ model User {
   name      String
   image     String
   createdAt DateTime  @default(now())
-  deletedAt DateTime
   deletedAt DateTime?
 }
