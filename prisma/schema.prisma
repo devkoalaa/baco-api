@@ -8,18 +8,9 @@ generator client {
 }
 
 model Item {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
   quantity  Int
   image     String
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
-}
-
-model User {
-  id        String    @id @default(uuid())
-  name      String
-  image     String
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
+  createdAt DateTime @default(now())
 }
