@@ -129,9 +129,18 @@ app.delete("/items/:id", async (req, res) => {
   return res.send({ status: "ok" });
 });
 
+app.get("/users", async (req, res) => {
+  consoleLog('get')
+  const users = await prisma.user.findMany({
+    orderBy: { createdAt: "asc" },
+  });
+
+  res.json(users);
+});
+
 app.post("/users", async (req, res) => {
   consoleLog('post')
-  const item = await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       name: req.body.name ?? "Sem nome",
       image: req.body.image ?? 'https://github.com/devkoalaa.png',
@@ -139,7 +148,7 @@ app.post("/users", async (req, res) => {
     },
   });
 
-  return res.json(item);
+  return res.json(user);
 });
 
 app.get("/", async (req, res) => {
