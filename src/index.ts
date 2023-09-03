@@ -129,6 +129,19 @@ app.delete("/items/:id", async (req, res) => {
   return res.send({ status: "ok" });
 });
 
+app.post("/users", async (req, res) => {
+  consoleLog('post')
+  const item = await prisma.user.create({
+    data: {
+      name: req.body.name ?? "Sem nome",
+      image: req.body.image ?? 'https://github.com/devkoalaa.png',
+      createdAt: new Date(),
+    },
+  });
+
+  return res.json(item);
+});
+
 app.get("/", async (req, res) => {
   res.send(
     `
