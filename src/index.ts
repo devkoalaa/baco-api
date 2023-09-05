@@ -78,6 +78,9 @@ app.post('/upload', async (req: any, res: any) => {
 app.get("/items", async (req, res) => {
   consoleLog('get')
   const items = await prisma.item.findMany({
+    where: {
+      deletedAt: null
+    },
     orderBy: { createdAt: "asc" },
   });
 
@@ -136,6 +139,9 @@ app.delete("/items/:id", async (req, res) => {
 app.get("/users", async (req, res) => {
   consoleLog('get')
   const users = await prisma.user.findMany({
+    where: {
+      deletedAt: null
+    },
     orderBy: { createdAt: "asc" },
   });
 
