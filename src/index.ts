@@ -122,11 +122,14 @@ app.put("/items/:id", async (req, res) => {
 app.delete("/items/:id", async (req, res) => {
   consoleLog('delete')
   const id = req.params.id;
-  await prisma.item.delete({
+  const item = await prisma.item.update({
     where: { id },
+    data: {
+      deletedAt: new Date(),
+    }
   });
 
-  return res.send({ status: "ok" });
+  return res.json(item);
 });
 
 app.get("/users", async (req, res) => {
