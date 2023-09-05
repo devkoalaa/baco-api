@@ -95,7 +95,8 @@ app.post("/items", async (req, res) => {
       quantity: req.body.quantity ?? 0,
       image: req.body.image ?? 'https://github.com/devkoalaa.png',
       createdAt: new Date(),
-      deletedAt: null
+      deletedAt: null,
+      userId: req.body.userId ?? '3a438284-d1f0-4ff1-b9f3-1a09a3aff19a'
     },
   });
 
