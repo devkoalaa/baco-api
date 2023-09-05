@@ -92,6 +92,7 @@ app.post("/items", async (req, res) => {
       quantity: req.body.quantity ?? 0,
       image: req.body.image ?? 'https://github.com/devkoalaa.png',
       createdAt: new Date(),
+      deletedAt: null
     },
   });
 
@@ -148,6 +149,7 @@ app.post("/users", async (req, res) => {
       name: req.body.name ?? "Sem nome",
       image: req.body.image ?? 'https://github.com/devkoalaa.png',
       createdAt: new Date(),
+      deletedAt: null
     },
   });
 
@@ -157,12 +159,7 @@ app.post("/users", async (req, res) => {
 app.get("/", async (req, res) => {
   res.send(
     `
-  <h1>Item REST API</h1>
-  <h2>Available Routes</h2>
-  <pre>
-    GET, POST /items
-    GET, PUT, DELETE /items/:id
-  </pre>
+  <h1>BACO-API</h1>
   `.trim(),
   );
 });
