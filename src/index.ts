@@ -1,12 +1,13 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma, PrismaClient } from "@prisma/client";
 import express from "express";
 import { Stream } from "stream";
+import { items } from "../api";
 const fileUpload = require('express-fileupload');
 const GOOGLE_API_FOLDER_ID = "1EUjB4GdBUhMUnl1tTfKXudpAsq6_D9BC";
 const stream = require('stream');
 const { google } = require('googleapis')
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -77,91 +78,102 @@ app.post('/upload', async (req: any, res: any) => {
 
 app.get("/items", async (req, res) => {
   consoleLog('get')
-  const items = await prisma.item.findMany({
-    where: {
-      deletedAt: null
-    },
-    orderBy: { createdAt: "asc" },
-  });
+  // const items = await prisma.item.findMany({
+  //   where: {
+  //     deletedAt: null
+  //   },
+  //   orderBy: { createdAt: "asc" },
+  // });
 
-  res.json(items);
+  const response = items
+
+  res.json(response);
 });
 
 app.post("/items", async (req, res) => {
   consoleLog('post')
-  const item = await prisma.item.create({
-    data: {
-      name: req.body.name ?? "Sem nome",
-      quantity: req.body.quantity ?? 0,
-      image: req.body.image ?? 'https://github.com/devkoalaa.png',
-      createdAt: new Date(),
-      deletedAt: null,
-      userId: req.body.userId ?? '3a438284-d1f0-4ff1-b9f3-1a09a3aff19a'
-    },
-  });
+  // const item = await prisma.item.create({
+  //   data: {
+  //     name: req.body.name ?? "Sem nome",
+  //     quantity: req.body.quantity ?? 0,
+  //     image: req.body.image ?? 'https://github.com/devkoalaa.png',
+  //     createdAt: new Date(),
+  //     deletedAt: null,
+  //     userId: req.body.userId ?? '3a438284-d1f0-4ff1-b9f3-1a09a3aff19a'
+  //   },
+  // });
 
-  return res.json(item);
+  const response = items
+
+  return res.json(response);
 });
 
 app.get("/items/:id", async (req, res) => {
-  consoleLog('getById')
   const id = req.params.id;
-  const item = await prisma.item.findUnique({
-    where: { id },
-  });
+  consoleLog(`getById: ${id}`)
+  // const item = await prisma.item.findUnique({
+  //   where: { id },
+  // });
 
-  return res.json(item);
+  const response = items[0]
+
+  return res.json(response);
 });
 
 app.put("/items/:id", async (req, res) => {
-  consoleLog('put')
   const id = req.params.id;
-  const item = await prisma.item.update({
-    where: { id },
-    data: req.body,
-  });
+  consoleLog(`put: ${id}`)
+  // const item = await prisma.item.update({
+  //   where: { id },
+  //   data: req.body,
+  // });
 
-  return res.json(item);
+  const response = items[0]
+
+  return res.json(response);
 });
 
 app.delete("/items/:id", async (req, res) => {
-  consoleLog('delete')
   const id = req.params.id;
-  const item = await prisma.item.update({
-    where: { id },
-    data: {
-      deletedAt: new Date(),
-    }
-  });
 
-  return res.json(item);
+  consoleLog(`delete: ${id}`)
+  // const item = await prisma.item.update({
+  //   where: { id },
+  //   data: {
+  //     deletedAt: new Date(),
+  //   }
+  // });
+
+  const response = items[0]
+
+  return res.json(response);
 });
 
-app.get("/users", async (req, res) => {
-  consoleLog('get')
-  const users = await prisma.user.findMany({
-    where: {
-      deletedAt: null
-    },
-    orderBy: { createdAt: "asc" },
-  });
+// app.get("/users", async (req, res) => {
+//   consoleLog('get')
+//   const users = await prisma.user.findMany({
+//     where: {
+//       deletedAt: null
+//     },
+//     orderBy: { createdAt: "asc" },
+//   });
 
-  res.json(users);
-});
+//   res.json(users);
+// });
 
-app.post("/users", async (req, res) => {
-  consoleLog('post')
-  const user = await prisma.user.create({
-    data: {
-      name: req.body.name ?? "Sem nome",
-      image: req.body.image ?? 'https://github.com/devkoalaa.png',
-      createdAt: new Date(),
-      deletedAt: null
-    },
-  });
+// app.post("/users", async (req, res) => {
+//   consoleLog('post')
+//   const user = await prisma.user.create({
+//     data: {
+//       name: req.body.name ?? "Sem nome",
+//       image: req.body.image ?? 'https://github.com/devkoalaa.png',
+//       createdAt: new Date(),
+//       deletedAt: null
+//     },
+//   });
 
-  return res.json(user);
-});
+//   return res.json(user);
+// });
 
 app.get("/", async (req, res) => {
   res.send(
