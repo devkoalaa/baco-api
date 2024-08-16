@@ -1,4 +1,4 @@
-import { prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import express from "express";
 import { Stream } from "stream";
 import { items } from "../api";
@@ -7,7 +7,7 @@ const GOOGLE_API_FOLDER_ID = "1EUjB4GdBUhMUnl1tTfKXudpAsq6_D9BC";
 const stream = require('stream');
 const { google } = require('googleapis')
 
-// const prisma = new PrismaClient();
+const prisma = new PrismaClient();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -78,12 +78,12 @@ app.post('/upload', async (req: any, res: any) => {
 
 app.get("/items", async (req, res) => {
   consoleLog('get')
-  // const items = await prisma.item.findMany({
-  //   where: {
-  //     deletedAt: null
-  //   },
-  //   orderBy: { createdAt: "asc" },
-  // });
+  const items = await prisma.item.findMany({
+    where: {
+      deletedAt: null
+    },
+    orderBy: { createdAt: "asc" },
+  });
 
   const response = items
 
