@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import express from "express";
 import { Stream } from "stream";
-import { items } from "../api";
 const fileUpload = require('express-fileupload');
 const GOOGLE_API_FOLDER_ID = "1EUjB4GdBUhMUnl1tTfKXudpAsq6_D9BC";
 const stream = require('stream');
@@ -103,7 +102,15 @@ app.post("/items", async (req, res) => {
   //   },
   // });
 
-  const response = items
+  const response = [{
+    "id": "1",
+    "name": "Isqueiro",
+    "quantity": 100,
+    "image": "http://github.com/devkoalaa.png",
+    "createdAt": "13/01/2023",
+    "deletedAt": null,
+    "userId": "3a438284-d1f0-4ff1-b9f3-1a09a3aff19a"
+  }]
 
   return res.json(response);
 });
@@ -115,7 +122,15 @@ app.get("/items/:id", async (req, res) => {
   //   where: { id },
   // });
 
-  const response = items[0]
+  const response = {
+    "id": "1",
+    "name": "Isqueiro",
+    "quantity": 100,
+    "image": "http://github.com/devkoalaa.png",
+    "createdAt": "13/01/2023",
+    "deletedAt": null,
+    "userId": "3a438284-d1f0-4ff1-b9f3-1a09a3aff19a"
+  }
 
   return res.json(response);
 });
@@ -128,7 +143,15 @@ app.put("/items/:id", async (req, res) => {
   //   data: req.body,
   // });
 
-  const response = items[0]
+  const response = {
+    "id": "1",
+    "name": "Isqueiro",
+    "quantity": 100,
+    "image": "http://github.com/devkoalaa.png",
+    "createdAt": "13/01/2023",
+    "deletedAt": null,
+    "userId": "3a438284-d1f0-4ff1-b9f3-1a09a3aff19a"
+  }
 
   return res.json(response);
 });
@@ -144,7 +167,15 @@ app.delete("/items/:id", async (req, res) => {
   //   }
   // });
 
-  const response = items[0]
+  const response = {
+    "id": "1",
+    "name": "Isqueiro",
+    "quantity": 100,
+    "image": "http://github.com/devkoalaa.png",
+    "createdAt": "13/01/2023",
+    "deletedAt": null,
+    "userId": "3a438284-d1f0-4ff1-b9f3-1a09a3aff19a"
+  }
 
   return res.json(response);
 });
