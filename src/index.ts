@@ -184,5 +184,5 @@ app.get("/", async (req, res) => {
 });
 
 app.listen(Number(port), "0.0.0.0", () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+  console.log(`Example app listening at http://localhost:${process.env.PORT}`);
 });
