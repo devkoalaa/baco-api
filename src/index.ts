@@ -218,5 +218,5 @@ app.get("/", async (req, res) => {
 });
 
 app.listen(Number(port), "0.0.0.0", () => {
-  console.log(`Baco API já tá rodando em http://localhost:${port}`);
+  console.log(`\nBaco API já tá rodando em http://localhost:${port} 🚀\n`);
 });

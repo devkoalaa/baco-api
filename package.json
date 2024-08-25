@@ -5,7 +5,7 @@
   "author": "devkoalaa",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "dev": "nodemon --watch src --exec \"node --no-deprecation -r ts-node/register\" src/index.ts",
     "build": "tsc && prisma generate",
     "start": "node dist/index.js"
   },
