@@ -192,13 +192,13 @@ app.listen(Number(port), "0.0.0.0", () => {
 })
 
 process.on('SIGINT', async () => {
-  console.log('Fechando conexão com o banco de dados.')
+  console.log('\n\nFechando conexão com o banco de dados.')
   await prisma.$disconnect()
   process.exit(0)
 })
 
 process.on('SIGTERM', async () => {
-  console.log('Fechando conexão com o banco de dados.')
+  console.log('\n\nFechando conexão com o banco de dados.')
   await prisma.$disconnect()
   process.exit(0)
 })
