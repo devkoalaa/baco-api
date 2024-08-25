@@ -17,14 +17,17 @@ app.use(express.raw({ type: "application/vnd.custom-type" }));
 app.use(express.text({ type: "text/html" }));
 app.use(fileUpload());
 
-function consoleLog(rota: string) {
-  let date_ob = new Date();
-  let date = ("0" + date_ob.getDate()).slice(-2);
-  let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
-  let year = date_ob.getFullYear();
-  let hours = date_ob.getHours() - 3;
-  let minutes = date_ob.getMinutes();
-  console.log(rota, date + "/" + month + "/" + year + " " + hours + ":" + minutes);
+function log(rota: string, metodo: string = 'get') {
+  let date_ob = new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" });
+  let date = new Date(date_ob);
+
+  let day = ("0" + date.getDate()).slice(-2);
+  let month = ("0" + (date.getMonth() + 1)).slice(-2);
+  let year = date.getFullYear();
+  let hours = ("0" + date.getHours()).slice(-2);
+  let minutes = ("0" + date.getMinutes()).slice(-2);
+
+  console.info(`Acessou a rota: '${rota}', método: '${metodo}', data: '${day}/${month}/${year} ${hours}h${minutes}'\n`);
 }
 
 async function uploadFile(file: Stream, name: string) {
@@ -62,7 +65,8 @@ async function uploadFile(file: Stream, name: string) {
 }
 
 app.post('/upload', async (req: any, res: any) => {
-  consoleLog('upload')
+  log('/upload', 'post')
+
   const { image } = req.files;
 
   const bufferStream = new stream.PassThrough()
@@ -77,7 +81,8 @@ app.post('/upload', async (req: any, res: any) => {
 })
 
 app.get("/items", async (req, res) => {
-  consoleLog('get')
+  log('/items')
+
   const items = await prisma.item.findMany({
     where: {
       deletedAt: null
@@ -91,123 +96,61 @@ app.get("/items", async (req, res) => {
 });
 
 app.post("/items", async (req, res) => {
-  consoleLog('post')
-  // const item = await prisma.item.create({
-  //   data: {
-  //     name: req.body.name ?? "Sem nome",
-  //     quantity: req.body.quantity ?? 0,
-  //     image: req.body.image ?? 'https://github.com/devkoalaa.png',
-  //     createdAt: new Date(),
-  //     deletedAt: null,
-  //     userId: req.body.userId ?? '3a438284-d1f0-4ff1-b9f3-1a09a3aff19a'
-  //   },
-  // });
+  log('/items', 'post')
 
-  const response = [{
-    "id": "1",
-    "name": "Isqueiro",
-    "quantity": 100,
-    "image": "http://github.com/devkoalaa.png",
-    "createdAt": "13/01/2023",
-    "deletedAt": null,
-    "userId": "3a438284-d1f0-4ff1-b9f3-1a09a3aff19a"
-  }]
+  const item = await prisma.item.create({
+    data: {
+      name: req.body.name ?? "Sem nome",
+      quantity: req.body.quantity ?? 0,
+      image: req.body.image ?? 'https://github.com/devkoalaa.png',
+      createdAt: new Date(),
+      deletedAt: null,
+    },
+  });
 
-  return res.json(response);
+  return res.json(item);
 });
 
 app.get("/items/:id", async (req, res) => {
   const id = req.params.id;
-  consoleLog(`getById: ${id}`)
-  // const item = await prisma.item.findUnique({
-  //   where: { id },
-  // });
+  log(`/items/${id}`)
 
-  const response = {
-    "id": "1",
-    "name": "Isqueiro",
-    "quantity": 100,
-    "image": "http://github.com/devkoalaa.png",
-    "createdAt": "13/01/2023",
-    "deletedAt": null,
-    "userId": "3a438284-d1f0-4ff1-b9f3-1a09a3aff19a"
-  }
+  const item = await prisma.item.findUnique({
+    where: { id },
+  });
 
-  return res.json(response);
+  return res.json(item);
 });
 
 app.put("/items/:id", async (req, res) => {
   const id = req.params.id;
-  consoleLog(`put: ${id}`)
-  // const item = await prisma.item.update({
-  //   where: { id },
-  //   data: req.body,
-  // });
+  log(`/items/${id}`, 'put')
 
-  const response = {
-    "id": "1",
-    "name": "Isqueiro",
-    "quantity": 100,
-    "image": "http://github.com/devkoalaa.png",
-    "createdAt": "13/01/2023",
-    "deletedAt": null,
-    "userId": "3a438284-d1f0-4ff1-b9f3-1a09a3aff19a"
-  }
+  const item = await prisma.item.update({
+    where: { id },
+    data: req.body,
+  });
 
-  return res.json(response);
+  return res.json(item);
 });
 
 app.delete("/items/:id", async (req, res) => {
   const id = req.params.id;
+  log(`/items/${id}`, 'delete')
 
-  consoleLog(`delete: ${id}`)
-  // const item = await prisma.item.update({
-  //   where: { id },
-  //   data: {
-  //     deletedAt: new Date(),
-  //   }
-  // });
+  const item = await prisma.item.update({
+    where: { id },
+    data: {
+      deletedAt: new Date(),
+    }
+  });
 
-  const response = {
-    "id": "1",
-    "name": "Isqueiro",
-    "quantity": 100,
-    "image": "http://github.com/devkoalaa.png",
-    "createdAt": "13/01/2023",
-    "deletedAt": null,
-    "userId": "3a438284-d1f0-4ff1-b9f3-1a09a3aff19a"
-  }
-
-  return res.json(response);
+  return res.json(item);
 });
 
-// app.get("/users", async (req, res) => {
-//   consoleLog('get')
-//   const users = await prisma.user.findMany({
-//     where: {
-//       deletedAt: null
-//     },
-//     orderBy: { createdAt: "asc" },
-//   });
-
-//   res.json(users);
-// });
-
-// app.post("/users", async (req, res) => {
-//   consoleLog('post')
-//   const user = await prisma.user.create({
-//     data: {
-//       name: req.body.name ?? "Sem nome",
-//       image: req.body.image ?? 'https://github.com/devkoalaa.png',
-//       createdAt: new Date(),
-//       deletedAt: null
-//     },
-//   });
-
-//   return res.json(user);
-// });
-
 app.get("/", async (req, res) => {
+  log('/')
+
   res.send(
     `
     <body style="background-color: #343434">
