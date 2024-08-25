@@ -1,33 +1,33 @@
-import { PrismaClient } from "@prisma/client";
-import express from "express";
-import { Stream } from "stream";
-import dotenv from 'dotenv';
+import { PrismaClient } from "@prisma/client"
+import express from "express"
+import { Stream } from "stream"
+import dotenv from 'dotenv'
 
-dotenv.config();
-const fileUpload = require('express-fileupload');
-const GOOGLE_API_FOLDER_ID = process.env.GOOGLE_API_FOLDER_ID;
-const stream = require('stream');
+dotenv.config()
+const fileUpload = require('express-fileupload')
+const GOOGLE_API_FOLDER_ID = process.env.GOOGLE_API_FOLDER_ID
+const stream = require('stream')
 const { google } = require('googleapis')
-const prisma = new PrismaClient();
-const port = process.env.PORT || 3000;
-const app = express();
+const prisma = new PrismaClient()
+const port = process.env.PORT || 3000
+const app = express()
 
-app.use(express.json());
-app.use(express.raw({ type: "application/vnd.custom-type" }));
-app.use(express.text({ type: "text/html" }));
-app.use(fileUpload());
+app.use(express.json())
+app.use(express.raw({ type: "application/vnd.custom-type" }))
+app.use(express.text({ type: "text/html" }))
+app.use(fileUpload())
 
 function log(rota: string, metodo: string = 'get') {
-  let date_ob = new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" });
-  let date = new Date(date_ob);
+  let date_ob = new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
+  let date = new Date(date_ob)
 
-  let day = ("0" + date.getDate()).slice(-2);
-  let month = ("0" + (date.getMonth() + 1)).slice(-2);
-  let year = date.getFullYear();
-  let hours = ("0" + date.getHours()).slice(-2);
-  let minutes = ("0" + date.getMinutes()).slice(-2);
+  let day = ("0" + date.getDate()).slice(-2)
+  let month = ("0" + (date.getMonth() + 1)).slice(-2)
+  let year = date.getFullYear()
+  let hours = ("0" + date.getHours()).slice(-2)
+  let minutes = ("0" + date.getMinutes()).slice(-2)
 
-  console.info(`Acessou a rota: '${rota}', método: '${metodo}', data: '${day}/${month}/${year} ${hours}h${minutes}'\n`);
+  console.info(`Acessou a rota: '${rota}', método: '${metodo}', data: '${day}/${month}/${year} ${hours}h${minutes}'\n`)
 }
 
 async function uploadFile(file: Stream, name: string) {
@@ -60,93 +60,120 @@ async function uploadFile(file: Stream, name: string) {
 
     return response.data.id
   } catch (err) {
-    console.log('Erro ao criar arquivo:', err)
+    console.error('Erro ao criar arquivo:', err)
+    throw err
   }
 }
 
 app.post('/upload', async (req: any, res: any) => {
   log('/upload', 'post')
 
-  const { image } = req.files;
+  const { image } = req.files
 
   const bufferStream = new stream.PassThrough()
   bufferStream.end(image.data)
 
-  uploadFile(bufferStream, image.name).then(data => {
+  try {
+    const fileId = await uploadFile(bufferStream, image.name)
     res.json({
       imageName: image.name,
-      imageUrl: `https://drive.google.com/uc?export=view&id=${data}`
+      imageUrl: `https://drive.google.com/uc?export=view&id=${fileId}`
     })
-  })
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao fazer upload da imagem' })
+  }
 })
 
 app.get("/items", async (req, res) => {
   log('/items')
 
-  const items = await prisma.item.findMany({
-    where: {
-      deletedAt: null
-    },
-    orderBy: { createdAt: "asc" },
-  });
+  try {
+    const items = await prisma.item.findMany({
+      where: {
+        deletedAt: null
+      },
+      orderBy: { createdAt: "asc" },
+    })
 
-  const response = items
-
-  res.json(response);
-});
+    res.json(items)
+  } catch (error) {
+    console.error('Erro ao buscar itens:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
 
 app.post("/items", async (req, res) => {
   log('/items', 'post')
 
-  const item = await prisma.item.create({
-    data: {
-      name: req.body.name ?? "Sem nome",
-      quantity: req.body.quantity ?? 0,
-      image: req.body.image ?? 'https://github.com/devkoalaa.png',
-      createdAt: new Date(),
-      deletedAt: null,
-    },
-  });
+  try {
+    const item = await prisma.item.create({
+      data: {
+        name: req.body.name ?? "Sem nome",
+        quantity: req.body.quantity ?? 0,
+        image: req.body.image ?? 'https://github.com/devkoalaa.png',
+        createdAt: new Date(),
+        deletedAt: null,
+      },
+    })
 
-  return res.json(item);
-});
+    res.json(item)
+  } catch (error) {
+    console.error('Erro ao criar item:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
 
 app.get("/items/:id", async (req, res) => {
-  const id = req.params.id;
+  const id = req.params.id
   log(`/items/${id}`)
 
-  const item = await prisma.item.findUnique({
-    where: { id },
-  });
+  try {
+    const item = await prisma.item.findUnique({
+      where: { id },
+    })
 
-  return res.json(item);
-});
+    res.json(item)
+  } catch (error) {
+    console.error('Erro ao buscar item:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
 
 app.put("/items/:id", async (req, res) => {
-  const id = req.params.id;
+  const id = req.params.id
   log(`/items/${id}`, 'put')
 
-  const item = await prisma.item.update({
-    where: { id },
-    data: req.body,
-  });
+  try {
+    const item = await prisma.item.update({
+      where: { id },
+      data: req.body,
+    })
 
-  return res.json(item);
-});
+    res.json(item)
+  } catch (error) {
+    console.error('Erro ao atualizar item:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
 
 app.delete("/items/:id", async (req, res) => {
-  const id = req.params.id;
+  const id = req.params.id
   log(`/items/${id}`, 'delete')
 
-  const item = await prisma.item.update({
-    where: { id },
-    data: {
-      deletedAt: new Date(),
-    }
-  });
+  try {
+    const item = await prisma.item.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+      }
+    })
 
-  return res.json(item);
-});
+    res.json(item)
+  } catch (error) {
+    console.error('Erro ao deletar item:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
 
 app.get("/", async (req, res) => {
   log('/')
@@ -157,9 +184,21 @@ app.get("/", async (req, res) => {
       <h1 style="color: white">BACO-API</h1>
     </body>
     `.trim(),
-  );
-});
+  )
+})
 
 app.listen(Number(port), "0.0.0.0", () => {
-  console.log(`\nBaco API já tá rodando em http://localhost:${port} 🚀\n`);
-});
+  console.log(`\nBaco API já tá rodando em http://localhost:${port} 🚀\n`)
+})
+
+process.on('SIGINT', async () => {
+  console.log('Fechando conexão com o banco de dados.')
+  await prisma.$disconnect()
+  process.exit(0)
+})
+
+process.on('SIGTERM', async () => {
+  console.log('Fechando conexão com o banco de dados.')
+  await prisma.$disconnect()
+  process.exit(0)
+})
