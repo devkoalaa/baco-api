@@ -9,6 +9,11 @@
       }
     }
   ],
+  "build": {
+    "commands": {
+      "build": "prisma generate && tsc"
+    }
+  },
   "routes": [
     {
       "src": "/(.*)",
