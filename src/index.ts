@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 const fileUpload = require('express-fileupload');
-const GOOGLE_API_FOLDER_ID = "1EUjB4GdBUhMUnl1tTfKXudpAsq6_D9BC";
+const GOOGLE_API_FOLDER_ID = process.env.GOOGLE_API_FOLDER_ID;
 const stream = require('stream');
 const { google } = require('googleapis')
 const prisma = new PrismaClient();
@@ -30,7 +30,7 @@ function consoleLog(rota: string) {
 async function uploadFile(file: Stream, name: string) {
   try {
     const auth = new google.auth.GoogleAuth({
-      keyFile: 'baco-api.json',
+      credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS!),
       scopes: ['https://www.googleapis.com/auth/drive']
     })
 
