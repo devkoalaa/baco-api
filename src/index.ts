@@ -1,15 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import express from "express";
 import { Stream } from "stream";
+import dotenv from 'dotenv';
+
+dotenv.config();
 const fileUpload = require('express-fileupload');
 const GOOGLE_API_FOLDER_ID = "1EUjB4GdBUhMUnl1tTfKXudpAsq6_D9BC";
 const stream = require('stream');
 const { google } = require('googleapis')
-
 const prisma = new PrismaClient();
-
-const app = express();
 const port = process.env.PORT || 3000;
+const app = express();
 
 app.use(express.json());
 app.use(express.raw({ type: "application/vnd.custom-type" }));
@@ -209,11 +210,13 @@ app.delete("/items/:id", async (req, res) => {
 app.get("/", async (req, res) => {
   res.send(
     `
-  <h1>BACO-API</h1>
-  `.trim(),
+    <body style="background-color: #343434">
+      <h1 style="color: white">BACO-API</h1>
+    </body>
+    `.trim(),
   );
 });
 
 app.listen(Number(port), "0.0.0.0", () => {
-  console.log(`Example app listening at http://localhost:${process.env.PORT}`);
+  console.log(`Baco API já tá rodando em http://localhost:${port}`);
 });
