@@ -11,8 +11,8 @@ datasource db {
 model Item {
   id        String    @id @default(uuid()) @db.Uuid
   name      String
-  quantity  String    @db.VarChar(255)
-  image     String?   @db.VarChar(255)
+  image     String?
   createdAt DateTime  @default(now()) @db.Date
   deletedAt DateTime? @db.Date
+  quantity  Int       @default(0)
 }

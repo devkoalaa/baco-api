@@ -8,7 +8,9 @@ const fileUpload = require('express-fileupload')
 const GOOGLE_API_FOLDER_ID = process.env.GOOGLE_API_FOLDER_ID
 const stream = require('stream')
 const { google } = require('googleapis')
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  log: ['info'],
+})
 const port = process.env.PORT || 3000
 const app = express()
 
@@ -109,7 +111,7 @@ app.post("/items", async (req, res) => {
     const item = await prisma.item.create({
       data: {
         name: req.body.name ?? "Sem nome",
-        quantity: req.body.quantity ?? 0,
+        quantity: req.body.quantity ? Number(req.body.quantity) : 0,
         image: req.body.image ?? 'https://github.com/devkoalaa.png',
         createdAt: new Date(),
         deletedAt: null,
