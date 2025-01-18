@@ -48,4 +48,6 @@ model PresenceGift {
   gift       Gift     @relation(fields: [giftId], references: [id])
   giftId     String   @db.Uuid
   quantity   Int      @default(1)
+
+  @@unique([presenceId, giftId])
 }

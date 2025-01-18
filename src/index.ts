@@ -1,8 +1,8 @@
 import { PrismaClient } from "@prisma/client"
+import cors from 'cors'
+import dotenv from 'dotenv'
 import express from "express"
 import { Stream } from "stream"
-import dotenv from 'dotenv'
-import cors from 'cors'
 
 dotenv.config()
 const fileUpload = require('express-fileupload')
@@ -134,21 +134,21 @@ app.post("/gifts", async (req, res) => {
   }
 })
 
-app.get("/getGiftsByPresence/:id", async (req, res) => {
-  log('/getGiftsByPresence', 'get');
+app.get("/presence/:id", async (req, res) => {
+  log('/presence', 'get');
 
   const { id } = req.params;
 
   try {
     const presence = await prisma.presence.findUnique({
       where: { id },
-      include: {
-        selectedGifts: {
-          select: {
-            gift: true,
-            quantity: true,
-          },
-        },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        acompanhantesAdultos: true,
+        acompanhantesCriancas: true,
+        selectedGifts: true
       },
     });
 
@@ -156,9 +156,7 @@ app.get("/getGiftsByPresence/:id", async (req, res) => {
       return res.status(404).json({ error: "Presença não encontrada" });
     }
 
-    res.json({
-      selectedGifts: presence.selectedGifts,
-    });
+    res.json(presence);
   } catch (error) {
     console.error("Erro ao buscar presentes:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -167,15 +165,15 @@ app.get("/getGiftsByPresence/:id", async (req, res) => {
 
 
 app.post("/confirmPresence", async (req, res) => {
-  log('/presence', 'post')
+  log('/confirmPresence', 'post')
 
   try {
     const presence = await prisma.presence.create({
       data: {
         name: req.body.nome ?? "Sem nome",
         phone: req.body.telefone ?? "Sem telefone",
-        acompanhantesAdultos: req.body.acompanhantesAdultos,
-        acompanhantesCriancas: req.body.acompanhantesCriancas,
+        acompanhantesAdultos: req.body.acompanhantesAdultos ?? 0,
+        acompanhantesCriancas: req.body.acompanhantesCriancas ?? 0,
         createdAt: new Date(),
       },
     })
@@ -188,23 +186,76 @@ app.post("/confirmPresence", async (req, res) => {
 })
 
 app.post("/presenceGift", async (req, res) => {
-  log('/presenceGift', 'post')
+  log('/presenceGift', 'post');
 
   try {
-    const presenceGift = await prisma.presenceGift.create({
-      data: {
-        presenceId: req.body.presenceId,
-        giftId: req.body.giftId,
-        quantity: req.body.quantity ? Number(req.body.quantity) : 1,
-      },
-    })
+    const gifts = req.body;
 
-    res.json(presenceGift)
+    // Validação inicial
+    if (!Array.isArray(gifts)) {
+      return res.status(400).json({ error: 'O corpo da requisição deve ser um array de presentes.' });
+    }
+
+    // Verifica se todos os campos obrigatórios estão presentes e válidos
+    const invalidGifts = gifts.filter(
+      gift => !gift.presenceId || !gift.giftId || (gift.quantity && isNaN(Number(gift.quantity)))
+    );
+
+    if (invalidGifts.length > 0) {
+      return res.status(400).json({
+        error: 'Alguns presentes estão com dados inválidos.',
+        invalidGifts,
+      });
+    }
+
+    // Executa a transação para criar registros e atualizar a quantidade
+    const createdPresenceGifts = await prisma.$transaction(
+      gifts.flatMap(gift => [
+        prisma.presenceGift.upsert({
+          where: {
+            presenceId_giftId: {
+              presenceId: gift.presenceId,
+              giftId: gift.giftId,
+            },
+          },
+          update: {
+            quantity: {
+              increment: gift.quantity ? Number(gift.quantity) : 1,
+            },
+          },
+          create: {
+            presenceId: gift.presenceId,
+            giftId: gift.giftId,
+            quantity: gift.quantity ? Number(gift.quantity) : 1,
+          },
+        }),
+        prisma.gift.update({
+          where: {
+            id: gift.giftId,
+          },
+          data: {
+            quantityPurchased: {
+              increment: gift.quantity ? Number(gift.quantity) : 1,
+            },
+          },
+        }),
+      ])
+    );
+
+    res.status(201).json({
+      message: 'Presentes vinculados com sucesso.',
+      createdPresenceGifts,
+    });
   } catch (error) {
-    console.error('Erro ao vincular presente com presença:', error)
-    res.status(500).json({ error: 'Internal Server Error' })
+    console.error('Erro ao vincular presentes com presença:', error);
+
+    // Retorna um erro genérico
+    res.status(500).json({
+      error: 'Erro ao vincular presentes com presença. Por favor, tente novamente mais tarde.',
+      details: (error as any).message, // Inclui detalhes para debugging
+    });
   }
-})
+});
 
 app.get("/items", async (req, res) => {
   log('/items')
