@@ -26,4 +26,26 @@ model Gift {
   quantityPurchased Int       @default(0)
   createdAt         DateTime  @db.Date
   deletedAt         DateTime? @db.Date
+
+  PresenceGift PresenceGift[]
+}
+
+model Presence {
+  id                    String         @id @default(uuid()) @db.Uuid
+  name                  String
+  phone                 String
+  acompanhantesAdultos  Int            @default(0)
+  acompanhantesCriancas Int            @default(0)
+  createdAt             DateTime       @default(now()) @db.Date
+  deletedAt             DateTime?      @db.Date
+  selectedGifts         PresenceGift[]
+}
+
+model PresenceGift {
+  id         String   @id @default(uuid()) @db.Uuid
+  presence   Presence @relation(fields: [presenceId], references: [id])
+  presenceId String   @db.Uuid
+  gift       Gift     @relation(fields: [giftId], references: [id])
+  giftId     String   @db.Uuid
+  quantity   Int      @default(1)
 }

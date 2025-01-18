@@ -134,6 +134,78 @@ app.post("/gifts", async (req, res) => {
   }
 })
 
+app.get("/getGiftsByPresence/:id", async (req, res) => {
+  log('/getGiftsByPresence', 'get');
+
+  const { id } = req.params;
+
+  try {
+    const presence = await prisma.presence.findUnique({
+      where: { id },
+      include: {
+        selectedGifts: {
+          select: {
+            gift: true,
+            quantity: true,
+          },
+        },
+      },
+    });
+
+    if (!presence) {
+      return res.status(404).json({ error: "Presença não encontrada" });
+    }
+
+    res.json({
+      selectedGifts: presence.selectedGifts,
+    });
+  } catch (error) {
+    console.error("Erro ao buscar presentes:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+app.post("/confirmPresence", async (req, res) => {
+  log('/presence', 'post')
+
+  try {
+    const presence = await prisma.presence.create({
+      data: {
+        name: req.body.nome ?? "Sem nome",
+        phone: req.body.telefone ?? "Sem telefone",
+        acompanhantesAdultos: req.body.acompanhantesAdultos,
+        acompanhantesCriancas: req.body.acompanhantesCriancas,
+        createdAt: new Date(),
+      },
+    })
+
+    res.json(presence)
+  } catch (error) {
+    console.error('Erro ao confirmar presença:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
+
+app.post("/presenceGift", async (req, res) => {
+  log('/presenceGift', 'post')
+
+  try {
+    const presenceGift = await prisma.presenceGift.create({
+      data: {
+        presenceId: req.body.presenceId,
+        giftId: req.body.giftId,
+        quantity: req.body.quantity ? Number(req.body.quantity) : 1,
+      },
+    })
+
+    res.json(presenceGift)
+  } catch (error) {
+    console.error('Erro ao vincular presente com presença:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
+
 app.get("/items", async (req, res) => {
   log('/items')
 
