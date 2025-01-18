@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client"
 import express from "express"
 import { Stream } from "stream"
 import dotenv from 'dotenv'
+import cors from 'cors'
 
 dotenv.config()
 const fileUpload = require('express-fileupload')
@@ -13,6 +14,12 @@ const prisma = new PrismaClient({
 })
 const port = process.env.PORT || 3000
 const app = express()
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}))
 
 app.use(express.json())
 app.use(express.raw({ type: "application/vnd.custom-type" }))
