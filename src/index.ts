@@ -86,6 +86,47 @@ app.post('/upload', async (req: any, res: any) => {
   }
 })
 
+app.get("/gifts", async (req, res) => {
+  log('/gifts')
+
+  try {
+    const gifts = await prisma.gift.findMany({
+      where: {
+        deletedAt: null
+      },
+      orderBy: { createdAt: "asc" },
+    })
+
+    res.json(gifts)
+  } catch (error) {
+    console.error('Erro ao buscar presentes:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
+
+app.post("/gifts", async (req, res) => {
+  log('/gifts', 'post')
+
+  try {
+    const gift = await prisma.gift.create({
+      data: {
+        name: req.body.name ?? "Sem nome",
+        quantity: req.body.quantity ? Number(req.body.quantity) : 0,
+        quantityPurchased: req.body.quantityPurchased ? Number(req.body.quantityPurchased) : 0,
+        image: req.body.image ?? 'https://github.com/devkoalaa.png',
+        createdAt: new Date(),
+        deletedAt: null,
+        description: req.body.description ?? 'Sem descrição',
+      },
+    })
+
+    res.json(gift)
+  } catch (error) {
+    console.error('Erro ao criar presente:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
+
 app.get("/items", async (req, res) => {
   log('/items')
 

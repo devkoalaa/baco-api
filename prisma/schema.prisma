@@ -16,3 +16,14 @@ model Item {
   deletedAt DateTime? @db.Date
   quantity  Int       @default(0)
 }
+
+model Gift {
+  id                String    @id @default(uuid()) @db.Uuid
+  name              String    @default(dbgenerated("now()"))
+  image             String?
+  description       String
+  quantity          Int       @default(0)
+  quantityPurchased Int       @default(0)
+  createdAt         DateTime  @db.Date
+  deletedAt         DateTime? @db.Date
+}
