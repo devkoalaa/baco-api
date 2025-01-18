@@ -120,7 +120,7 @@ app.post("/gifts", async (req, res) => {
         name: req.body.name ?? "Sem nome",
         quantity: req.body.quantity ? Number(req.body.quantity) : 0,
         quantityPurchased: req.body.quantityPurchased ? Number(req.body.quantityPurchased) : 0,
-        image: req.body.image ?? 'https://github.com/devkoalaa.png',
+        image: req.body.image ?? '/images/placeholder.png',
         createdAt: new Date(),
         deletedAt: null,
         description: req.body.description ?? 'Sem descrição',
