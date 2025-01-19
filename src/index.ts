@@ -148,7 +148,12 @@ app.get("/presence/:id", async (req, res) => {
         phone: true,
         acompanhantesAdultos: true,
         acompanhantesCriancas: true,
-        selectedGifts: true
+        selectedGifts: {
+          select: {
+            gift: true
+          }
+        }
+
       },
     });
 
