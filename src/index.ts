@@ -101,7 +101,7 @@ app.get("/gifts", async (req, res) => {
       where: {
         deletedAt: null
       },
-      orderBy: { createdAt: "asc" },
+      orderBy: { name: "asc" },
     })
 
     res.json(gifts)

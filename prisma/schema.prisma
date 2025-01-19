@@ -24,7 +24,7 @@ model Gift {
   description       String
   quantity          Int       @default(0)
   quantityPurchased Int       @default(0)
-  createdAt         DateTime  @db.Date
+  createdAt         DateTime  @default(now()) @db.Date
   deletedAt         DateTime? @db.Date
 
   PresenceGift PresenceGift[]
