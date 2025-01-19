@@ -163,11 +163,44 @@ app.get("/presence/:id", async (req, res) => {
 
     res.json(presence);
   } catch (error) {
-    console.error("Erro ao buscar presentes:", error);
+    console.error("Erro ao buscar confirmações de presenças:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
+app.get("/presence", async (req, res) => {
+  log('/presence', 'get');
+
+  try {
+    const presence = await prisma.presence.findMany({
+      where: {
+        deletedAt: null
+      },
+      select: {
+        name: true,
+        createdAt: true,
+        phone: true,
+        acompanhantesAdultos: true,
+        acompanhantesCriancas: true,
+        selectedGifts: {
+          select: {
+            gift: true,
+            quantity: true
+          }
+        },
+      },
+    });
+
+    if (!presence) {
+      return res.status(404).json({ error: "Nenhuma confirmação de presença encontrada" });
+    }
+
+    res.json(presence);
+  } catch (error) {
+    console.error("Erro ao buscar confirmações presenças:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 app.post("/confirmPresence", async (req, res) => {
   log('/confirmPresence', 'post')
@@ -179,7 +212,6 @@ app.post("/confirmPresence", async (req, res) => {
         phone: req.body.telefone ?? "Sem telefone",
         acompanhantesAdultos: req.body.acompanhantesAdultos ?? 0,
         acompanhantesCriancas: req.body.acompanhantesCriancas ?? 0,
-        createdAt: new Date(),
       },
     })
 
