@@ -36,7 +36,7 @@ model Presence {
   phone                 String
   acompanhantesAdultos  Int            @default(0)
   acompanhantesCriancas Int            @default(0)
-  createdAt             DateTime       @default(now()) @db.Date
+  createdAt             DateTime       @default(now())
   deletedAt             DateTime?      @db.Date
   selectedGifts         PresenceGift[]
 }
