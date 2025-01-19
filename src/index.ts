@@ -150,10 +150,10 @@ app.get("/presence/:id", async (req, res) => {
         acompanhantesCriancas: true,
         selectedGifts: {
           select: {
-            gift: true
+            gift: true,
+            quantity: true
           }
-        }
-
+        },
       },
     });
 
