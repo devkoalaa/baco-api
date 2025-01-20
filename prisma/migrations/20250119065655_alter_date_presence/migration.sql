@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Presence" ALTER COLUMN "createdAt" SET DATA TYPE TIMESTAMP(3);

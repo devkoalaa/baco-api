@@ -12,22 +12,23 @@ model Item {
   id        String    @id @default(uuid()) @db.Uuid
   name      String
   image     String?
-  createdAt DateTime  @default(now()) @db.Date
-  deletedAt DateTime? @db.Date
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime? @db.Timestamptz(6)
+  deletedAt DateTime? @db.Timestamptz(6)
   quantity  Int       @default(0)
 }
 
 model Gift {
-  id                String    @id @default(uuid()) @db.Uuid
-  name              String    @default(dbgenerated("now()"))
+  id                String         @id @default(uuid()) @db.Uuid
+  name              String
   image             String?
   description       String
-  quantity          Int       @default(0)
-  quantityPurchased Int       @default(0)
-  createdAt         DateTime  @default(now()) @db.Date
-  deletedAt         DateTime? @db.Date
-
-  PresenceGift PresenceGift[]
+  quantity          Int            @default(1)
+  quantityPurchased Int            @default(0)
+  createdAt         DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime?      @db.Timestamptz(6)
+  deletedAt         DateTime?      @db.Timestamptz(6)
+  PresenceGift      PresenceGift[]
 }
 
 model Presence {
@@ -36,18 +37,19 @@ model Presence {
   phone                 String
   acompanhantesAdultos  Int            @default(0)
   acompanhantesCriancas Int            @default(0)
-  createdAt             DateTime       @default(now())
-  deletedAt             DateTime?      @db.Date
+  createdAt             DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt             DateTime?      @db.Timestamptz(6)
+  deletedAt             DateTime?      @db.Timestamptz(6)
   selectedGifts         PresenceGift[]
 }
 
 model PresenceGift {
   id         String   @id @default(uuid()) @db.Uuid
-  presence   Presence @relation(fields: [presenceId], references: [id])
   presenceId String   @db.Uuid
-  gift       Gift     @relation(fields: [giftId], references: [id])
   giftId     String   @db.Uuid
   quantity   Int      @default(1)
+  gift       Gift     @relation(fields: [giftId], references: [id])
+  presence   Presence @relation(fields: [presenceId], references: [id])
 
   @@unique([presenceId, giftId])
 }

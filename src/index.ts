@@ -12,6 +12,8 @@ const { google } = require('googleapis')
 const prisma = new PrismaClient({
   log: ['info'],
 })
+const timezone = process.env.APP_TIMEZONE || 'America/Sao_Paulo';
+prisma.$executeRawUnsafe(`SET time zone '${timezone}'`);
 const port = process.env.PORT || 3000
 const app = express()
 
@@ -27,6 +29,10 @@ app.use(express.text({ type: "text/html" }))
 app.use(fileUpload())
 
 function log(rota: string, metodo: string = 'get') {
+  console.info(`Acessou a rota: '${rota}', método: '${metodo}', data: '${getDate()}'\n`)
+}
+
+function getDate(toDb = false) {
   let date_ob = new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
   let date = new Date(date_ob)
 
@@ -36,7 +42,9 @@ function log(rota: string, metodo: string = 'get') {
   let hours = ("0" + date.getHours()).slice(-2)
   let minutes = ("0" + date.getMinutes()).slice(-2)
 
-  console.info(`Acessou a rota: '${rota}', método: '${metodo}', data: '${day}/${month}/${year} ${hours}h${minutes}'\n`)
+  const result = toDb ? new Date(`${year}-${month}-${day}T${hours}:${minutes}:00-03:00`) : `${day}/${month}/${year} ${hours}h${minutes}`
+
+  return result
 }
 
 async function uploadFile(file: Stream, name: string) {
@@ -118,11 +126,9 @@ app.post("/gifts", async (req, res) => {
     const gift = await prisma.gift.create({
       data: {
         name: req.body.name ?? "Sem nome",
-        quantity: req.body.quantity ? Number(req.body.quantity) : 0,
+        quantity: req.body.quantity ? Number(req.body.quantity) : 1,
         quantityPurchased: req.body.quantityPurchased ? Number(req.body.quantityPurchased) : 0,
         image: req.body.image ?? '/images/placeholder.png',
-        createdAt: new Date(),
-        deletedAt: null,
         description: req.body.description ?? 'Sem descrição',
       },
     })
@@ -204,7 +210,6 @@ app.get("/presence", async (req, res) => {
 
 app.post("/confirmPresence", async (req, res) => {
   log('/confirmPresence', 'post')
-
   try {
     const presence = await prisma.presence.create({
       data: {
@@ -321,7 +326,6 @@ app.post("/items", async (req, res) => {
         name: req.body.name ?? "Sem nome",
         quantity: req.body.quantity ? Number(req.body.quantity) : 0,
         image: req.body.image ?? 'https://github.com/devkoalaa.png',
-        createdAt: new Date(),
         deletedAt: null,
       },
     })
