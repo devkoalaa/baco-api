@@ -140,6 +140,43 @@ app.post("/gifts", async (req, res) => {
   }
 })
 
+app.get("/presenceByPhone/:phone", async (req, res) => {
+  log('/presenceByPhone', 'get');
+
+  const { phone } = req.params;
+
+  try {
+    const presence = await prisma.presence.findFirst({
+      where: {
+        phone: phone,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        acompanhantesAdultos: true,
+        acompanhantesCriancas: true,
+        selectedGifts: {
+          select: {
+            gift: true,
+            quantity: true
+          }
+        },
+      },
+    });
+
+    if (!presence) {
+      return res.status(404).json({ error: "Presença não encontrada" });
+    }
+
+    res.json(presence);
+  } catch (error) {
+    console.error("Erro ao buscar confirmações de presenças:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.get("/presence/:id", async (req, res) => {
   log('/presence', 'get');
 
