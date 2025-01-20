@@ -146,8 +146,11 @@ app.get("/presence/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const presence = await prisma.presence.findUnique({
-      where: { id },
+    const presence = await prisma.presence.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
       select: {
         id: true,
         name: true,
