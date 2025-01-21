@@ -236,7 +236,7 @@ app.get("/presence", async (req, res) => {
         },
       },
       orderBy: {
-        createdAt: 'asc'
+        createdAt: 'desc'
       }
     });
 
