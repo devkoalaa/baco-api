@@ -276,12 +276,10 @@ app.post("/presenceGift", async (req, res) => {
   try {
     const gifts = req.body;
 
-    // Validação inicial
     if (!Array.isArray(gifts)) {
       return res.status(400).json({ error: 'O corpo da requisição deve ser um array de presentes.' });
     }
 
-    // Verifica se todos os campos obrigatórios estão presentes e válidos
     const invalidGifts = gifts.filter(
       gift => !gift.presenceId || !gift.giftId || (gift.quantity && isNaN(Number(gift.quantity)))
     );
@@ -293,7 +291,6 @@ app.post("/presenceGift", async (req, res) => {
       });
     }
 
-    // Executa a transação para criar registros e atualizar a quantidade
     const createdPresenceGifts = await prisma.$transaction(
       gifts.flatMap(gift => [
         prisma.presenceGift.upsert({
@@ -334,10 +331,134 @@ app.post("/presenceGift", async (req, res) => {
   } catch (error) {
     console.error('Erro ao vincular presentes com presença:', error);
 
-    // Retorna um erro genérico
     res.status(500).json({
       error: 'Erro ao vincular presentes com presença. Por favor, tente novamente mais tarde.',
-      details: (error as any).message, // Inclui detalhes para debugging
+      details: (error as any).message,
+    });
+  }
+});
+
+app.delete("/presenceGift", async (req, res) => {
+  log('/presenceGift', 'delete');
+
+  try {
+    const { presenceId, giftId } = req.body;
+
+    if (!presenceId || !giftId) {
+      return res.status(400).json({ error: 'Os campos presenceId e giftId são obrigatórios.' });
+    }
+
+    const existingPresenceGift = await prisma.presenceGift.findUnique({
+      where: {
+        presenceId_giftId: {
+          presenceId,
+          giftId,
+        },
+      },
+    });
+
+    if (!existingPresenceGift) {
+      return res.status(404).json({ error: 'Presente não encontrado para o cadastro especificado.' });
+    }
+
+    const { quantity } = existingPresenceGift;
+
+    await prisma.$transaction([
+      prisma.presenceGift.delete({
+        where: {
+          presenceId_giftId: {
+            presenceId,
+            giftId,
+          },
+        },
+      }),
+      prisma.gift.update({
+        where: {
+          id: giftId,
+        },
+        data: {
+          quantityPurchased: {
+            decrement: quantity,
+          },
+        },
+      }),
+    ]);
+
+    res.status(200).json({
+      message: 'Presente removido com sucesso.',
+    });
+  } catch (error) {
+    console.error('Erro ao remover presente:', error);
+
+    res.status(500).json({
+      error: 'Erro ao remover presente. Por favor, tente novamente mais tarde.',
+      details: (error as any).message,
+    });
+  }
+});
+
+app.patch("/presenceGift", async (req, res) => {
+  log('/presenceGift', 'patch');
+
+  try {
+    const { presenceId, giftId, quantity } = req.body;
+
+    if (!presenceId || !giftId || quantity === undefined) {
+      return res.status(400).json({ error: 'Os campos presenceId, giftId e quantity são obrigatórios.' });
+    }
+
+    if (isNaN(Number(quantity)) || Number(quantity) < 0) {
+      return res.status(400).json({ error: 'O campo quantity deve ser um número válido maior ou igual a um.' });
+    }
+
+    const existingPresenceGift = await prisma.presenceGift.findUnique({
+      where: {
+        presenceId_giftId: {
+          presenceId,
+          giftId,
+        },
+      },
+    });
+
+    if (!existingPresenceGift) {
+      return res.status(404).json({ error: 'Presente não encontrado para o cadastro especificado.' });
+    }
+
+    const quantityDifference = Number(quantity) - existingPresenceGift.quantity;
+
+    await prisma.$transaction([
+      prisma.presenceGift.update({
+        where: {
+          presenceId_giftId: {
+            presenceId,
+            giftId,
+          },
+        },
+        data: {
+          quantity: Number(quantity),
+        },
+      }),
+      prisma.gift.update({
+        where: {
+          id: giftId,
+        },
+        data: {
+          quantityPurchased: {
+            increment: quantityDifference,
+          },
+        },
+      }),
+    ]);
+
+    res.status(200).json({
+      message: 'Quantidade do presente atualizada com sucesso.',
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar a quantidade do presente:', error);
+
+    res.status(500).json({
+      error: 'Erro ao atualizar a quantidade do presente. Por favor, tente novamente mais tarde.',
+      details: (error as any).message,
     });
   }
 });
