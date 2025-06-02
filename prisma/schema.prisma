@@ -53,3 +53,13 @@ model PresenceGift {
 
   @@unique([presenceId, giftId])
 }
+
+model Message {
+  id        String    @id @default(uuid()) @db.Uuid
+  content   String
+  sender    String
+  isRead    Boolean?  @default(false)
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime? @db.Timestamptz(6)
+  deletedAt DateTime? @db.Timestamptz(6)
+}

@@ -553,6 +553,42 @@ app.delete("/items/:id", async (req, res) => {
   }
 })
 
+app.get("/messages", async (req, res) => {
+  log('/messages')
+
+  try {
+    const messages = await prisma.message.findMany({
+      where: {
+        deletedAt: null
+      },
+      orderBy: { createdAt: "desc" },
+    })
+
+    res.json(messages)
+  } catch (error) {
+    console.error('Erro ao buscar mensagens:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
+
+app.post("/messages", async (req, res) => {
+  log('/messages', 'post')
+
+  try {
+    const message = await prisma.message.create({
+      data: {
+        content: req.body.content,
+        sender: req.body.sender,
+      },
+    })
+
+    res.json(message)
+  } catch (error) {
+    console.error('Erro ao criar mensagem:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
+
 app.get("/", async (req, res) => {
   log('/')
 
