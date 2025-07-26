@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import express from "express"
 import { Stream } from "stream"
+import Pusher from 'pusher'
 
 dotenv.config()
 const fileUpload = require('express-fileupload')
@@ -587,6 +588,33 @@ app.post("/messages", async (req, res) => {
     console.error('Erro ao criar mensagem:', error)
     res.status(500).json({ error: 'Internal Server Error' })
   }
+})
+
+app.post("/stream-message", async (req, res) => {
+  log('/stream-message', 'post')
+
+  const pusher = new Pusher({
+    appId: process.env.PUSHER_APP_ID!,
+    key: process.env.PUSHER_KEY!,
+    secret: process.env.PUSHER_SECRET!,
+    cluster: process.env.PUSHER_CLUSTER!,
+  })
+
+  const { mensagem, nome, valor } = req.body
+
+  console.log(req.body)
+
+  const response: any = await pusher.trigger(
+    'canal-alertas-pix',
+    'nova-doacao',
+    {
+      mensagem,
+      nome,
+      valor,
+    },
+  );
+
+  res.json({ message: 'Mensagem enviada com sucesso' })
 })
 
 app.get("/", async (req, res) => {
